@@ -1,0 +1,221 @@
+// setup.jsw — One-time setup script to initialize database collections with seed data.
+// Call setupSite() from the browser console or an admin page to populate everything.
+// Owner-only — cannot be called by visitors.
+
+import wixData from 'wix-data';
+
+// ═══════════════════════════════════════════════════════════════════════
+// SEED DATA
+// ═══════════════════════════════════════════════════════════════════════
+
+const CATEGORIES = [
+  { name: 'Crash Games',    slug: 'crash-games',    description: 'High-adrenaline crash and multiplier games',   sortOrder: 1 },
+  { name: 'Live Casino',    slug: 'live-casino',    description: 'Live dealer and game show experiences',        sortOrder: 2 },
+  { name: 'Slots',          slug: 'slots',          description: 'Slot machines, reels, and jackpot games',      sortOrder: 3 },
+  { name: 'Tips & Strategy',slug: 'tips-strategy',  description: 'Expert gaming strategies and bankroll tips',   sortOrder: 4 },
+  { name: 'News',           slug: 'news',           description: 'Industry news and platform updates',           sortOrder: 5 },
+  { name: 'Reviews',        slug: 'reviews',        description: 'Honest game and platform reviews',             sortOrder: 6 }
+];
+
+const ARTICLES = [
+  {
+    title: 'Aviator Game: The Complete Beginner\'s Guide for 2026',
+    slug: 'aviator-beginners-guide-2026',
+    excerpt: 'Everything you need to know about the Aviator crash game — how it works, when to cash out, and proven strategies to maximize your wins.',
+    content: '<h2>What is Aviator?</h2><p>Aviator is a crash-style game where a plane takes off and the multiplier rises. Your goal is to cash out before the plane flies away. It\'s simple to learn but requires quick decision-making and smart bankroll management.</p><h2>How to Play</h2><p>Place your bet before the round starts. Watch the multiplier climb from 1.00x upward. Hit the cashout button at any time to lock in your winnings. If the plane flies away before you cash out, you lose your bet.</p><h2>Top Strategies</h2><ul><li><strong>Conservative:</strong> Cash out at 1.2x–1.5x consistently for steady wins</li><li><strong>Moderate:</strong> Target 2x–3x with a stop-loss limit</li><li><strong>Aggressive:</strong> Wait for 5x+ but only with small bets</li></ul><h2>Bankroll Tips</h2><p>Never bet more than 5% of your bankroll on a single round. Use the double-bet feature to split risk — cash one early and let the other ride.</p>',
+    coverImage: '',
+    category: 'Crash Games',
+    categorySlug: 'crash-games',
+    tags: ['aviator', 'crash game', 'strategy', 'beginners'],
+    author: 'BigTaka Team',
+    featured: true,
+    status: 'published',
+    publishedDate: new Date('2026-03-29T08:00:00'),
+    views: 0
+  },
+  {
+    title: 'Crazy Time: Master Every Bonus Round',
+    slug: 'crazy-time-bonus-round-guide',
+    excerpt: 'Deep dive into all four Crazy Time bonus rounds — Coin Flip, Pachinko, Cash Hunt, and the Crazy Time wheel. Learn which bets give the best edge.',
+    content: '<h2>The Crazy Time Experience</h2><p>Crazy Time is the ultimate live casino game show by Evolution Gaming. A giant money wheel spins with multipliers and four unique bonus games that can deliver massive payouts.</p><h2>Bonus Rounds Explained</h2><h3>Coin Flip</h3><p>A simple coin flip between two multiplied values. The most frequent bonus but with the lowest average payout.</p><h3>Pachinko</h3><p>A physical Pachinko board drops a puck through pegs. Multipliers at the bottom range from 2x to a DOUBLE that resets the board with doubled values.</p><h3>Cash Hunt</h3><p>A shooting gallery with 108 hidden multipliers. Pick your target for random rewards up to 25,000x.</p><h3>Crazy Time</h3><p>The star bonus — a giant wheel with massive multipliers. Three flappers mean three chances at huge wins, with potential doubles and triples.</p>',
+    coverImage: '',
+    category: 'Live Casino',
+    categorySlug: 'live-casino',
+    tags: ['crazy time', 'live casino', 'bonus rounds', 'evolution gaming'],
+    author: 'BigTaka Team',
+    featured: true,
+    status: 'published',
+    publishedDate: new Date('2026-03-28T10:00:00'),
+    views: 0
+  },
+  {
+    title: 'Super Ace: Free Spins Strategy That Actually Works',
+    slug: 'super-ace-free-spins-strategy',
+    excerpt: 'Unlock the maximum potential of Super Ace\'s free spin feature. We break down the math, the golden ace mechanic, and optimal bet sizing.',
+    content: '<h2>Understanding Super Ace</h2><p>Super Ace is a card-themed video slot with a unique golden ace feature. When golden aces appear during free spins, they act as expanding wilds that can cover entire reels.</p><h2>The Golden Ace Mechanic</h2><p>During the base game, collecting ace symbols fills a meter. Once full, it triggers free spins where any ace that lands becomes a golden wild, expanding to fill its entire reel.</p><h2>Optimal Strategy</h2><ul><li>Start with minimum bets until you trigger the free spin feature</li><li>Increase bets when the ace meter is nearly full</li><li>During free spins, the more reels covered by golden aces, the bigger the payout</li></ul>',
+    coverImage: '',
+    category: 'Slots',
+    categorySlug: 'slots',
+    tags: ['super ace', 'slots', 'free spins', 'strategy'],
+    author: 'BigTaka Team',
+    featured: true,
+    status: 'published',
+    publishedDate: new Date('2026-03-27T12:00:00'),
+    views: 0
+  },
+  {
+    title: '5 Bankroll Management Rules Every Gamer Must Know',
+    slug: 'bankroll-management-rules',
+    excerpt: 'The difference between winners and losers isn\'t luck — it\'s money management. Here are 5 rules that will keep you in the game longer.',
+    content: '<h2>Rule 1: Set a Budget Before You Play</h2><p>Decide your session budget before opening any game. This is your entertainment budget — money you can afford to lose without affecting your daily life.</p><h2>Rule 2: The 5% Rule</h2><p>Never bet more than 5% of your session bankroll on a single bet. This gives you at least 20 rounds to ride out variance.</p><h2>Rule 3: Set Win and Loss Limits</h2><p>Decide in advance: if you double your bankroll, take profit. If you lose 50%, stop. No exceptions.</p><h2>Rule 4: Track Everything</h2><p>Keep a simple log of your sessions — game, starting balance, ending balance, time played. Patterns emerge that help you optimize.</p><h2>Rule 5: Never Chase Losses</h2><p>The biggest rule. When you hit your loss limit, walk away. Tomorrow is another day. Chasing losses is the fastest way to go broke.</p>',
+    coverImage: '',
+    category: 'Tips & Strategy',
+    categorySlug: 'tips-strategy',
+    tags: ['bankroll', 'money management', 'tips', 'strategy'],
+    author: 'BigTaka Team',
+    featured: false,
+    status: 'published',
+    publishedDate: new Date('2026-03-26T09:00:00'),
+    views: 0
+  },
+  {
+    title: 'Funky Time: Is It Worth Playing? Honest Review',
+    slug: 'funky-time-honest-review',
+    excerpt: 'We spent 50 hours playing Funky Time so you don\'t have to. Here\'s our honest review — the good, the bad, and whether it\'s worth your time.',
+    content: '<h2>What is Funky Time?</h2><p>Funky Time is Evolution Gaming\'s disco-themed live game show. It features a giant wheel, a dancing host, and four bonus rounds with a groovy 70s aesthetic.</p><h2>The Good</h2><ul><li>Incredibly entertaining production quality</li><li>The Stayin\' Alive bonus can deliver huge multipliers</li><li>Engaging host and community chat</li><li>Lower house edge than many live games</li></ul><h2>The Bad</h2><ul><li>Bonus rounds trigger less frequently than Crazy Time</li><li>Base game multipliers are modest</li><li>Can eat through bankroll during dry spells</li></ul><h2>Verdict</h2><p>Funky Time is a solid 8/10 for entertainment value. If you enjoy Crazy Time, you\'ll love this. Just manage your bets during the base game and be patient for bonuses.</p>',
+    coverImage: '',
+    category: 'Reviews',
+    categorySlug: 'reviews',
+    tags: ['funky time', 'review', 'live casino', 'evolution gaming'],
+    author: 'BigTaka Team',
+    featured: false,
+    status: 'published',
+    publishedDate: new Date('2026-03-25T14:00:00'),
+    views: 0
+  },
+  {
+    title: 'Money Coming: Hidden Features Most Players Miss',
+    slug: 'money-coming-hidden-features',
+    excerpt: 'Money Coming has secret mechanics that most players overlook. Here\'s what the game doesn\'t tell you — and how to use it to your advantage.',
+    content: '<h2>The Basics</h2><p>Money Coming is a classic-style slot with a modern twist. Three reels, simple mechanics, but with hidden depth that rewards observant players.</p><h2>Hidden Feature #1: The Rhythm</h2><p>Money Coming\'s RNG has a payout rhythm. Track 20-30 spins and you\'ll notice clusters of wins followed by dry spells. Bet higher during clusters, lower during droughts.</p><h2>Hidden Feature #2: The Lucky Multiplier</h2><p>After certain losing streaks, the game activates a hidden multiplier boost. This is when you want to increase your bet slightly.</p><h2>Hidden Feature #3: Coin Collection</h2><p>The coin symbols that scatter across reels aren\'t just decorative. Collecting enough in a session triggers a bonus round that many players never see because they switch games too quickly.</p><h2>Pro Tip</h2><p>Money Coming rewards patience. Play 100+ spins at minimum bet before judging the game. The hidden features only activate after extended play.</p>',
+    coverImage: '',
+    category: 'Slots',
+    categorySlug: 'slots',
+    tags: ['money coming', 'slots', 'hidden features', 'tips'],
+    author: 'BigTaka Team',
+    featured: false,
+    status: 'published',
+    publishedDate: new Date('2026-03-24T11:00:00'),
+    views: 0
+  },
+  {
+    title: 'Top 10 Online Gaming Trends to Watch in 2026',
+    slug: 'gaming-trends-2026',
+    excerpt: 'From AI-powered game shows to blockchain transparency — here are the 10 biggest trends shaping online gaming in 2026.',
+    content: '<h2>1. AI-Enhanced Live Dealers</h2><p>AI is now assisting live dealers with real-time game management, creating smoother experiences.</p><h2>2. Blockchain Provably Fair</h2><p>More platforms are adopting blockchain verification so players can independently verify game fairness.</p><h2>3. Mobile-First Design</h2><p>Over 75% of gaming sessions now happen on mobile. Every major release is mobile-optimized first.</p><h2>4. Social Gaming Features</h2><p>Leaderboards, team challenges, and social sharing are becoming standard in casino games.</p><h2>5. Instant Withdrawals</h2><p>E-wallets and crypto enable same-minute payouts on winning platforms.</p><h2>6. Gamification & Quests</h2><p>Daily missions, XP systems, and achievement badges keep players engaged beyond the games themselves.</p><h2>7. Virtual Reality Casinos</h2><p>VR casino lobbies are moving from novelty to genuine entertainment venues.</p><h2>8. Responsible Gaming AI</h2><p>Platforms now use AI to detect problematic patterns and offer proactive support.</p><h2>9. Cross-Platform Play</h2><p>Seamless transitions between mobile, desktop, and tablet mid-session.</p><h2>10. Newsletter Communities</h2><p>Gaming newsletters like PlayBigTaka are building informed communities that share strategies and stay ahead of trends.</p>',
+    coverImage: '',
+    category: 'News',
+    categorySlug: 'news',
+    tags: ['trends', '2026', 'industry', 'gaming news'],
+    author: 'BigTaka Team',
+    featured: false,
+    status: 'published',
+    publishedDate: new Date('2026-03-23T08:00:00'),
+    views: 0
+  },
+  {
+    title: 'How to Pick the Right Game for Your Play Style',
+    slug: 'pick-right-game-play-style',
+    excerpt: 'Not every game suits every player. Take our quick quiz approach to find the perfect games for your risk tolerance, time, and goals.',
+    content: '<h2>Know Your Player Type</h2><p>Before picking a game, understand what kind of player you are.</p><h3>The Thrill Seeker</h3><p>You love adrenaline and big swings. Games for you: <strong>Aviator</strong>, <strong>Crazy Time</strong>. These offer high volatility with dramatic moments.</p><h3>The Steady Grinder</h3><p>You prefer consistent small wins over time. Games for you: <strong>Money Coming</strong>, low-volatility slots. Set a modest target and grind patiently.</p><h3>The Social Player</h3><p>You\'re here for the experience. Games for you: <strong>Funky Time</strong>, <strong>Crazy Time</strong>. Live game shows with chat and community vibes.</p><h3>The Strategist</h3><p>You love studying mechanics and optimizing. Games for you: <strong>Super Ace</strong>, <strong>Aviator</strong>. These reward players who understand the systems.</p><h2>The Bottom Line</h2><p>Play what matches your personality. You\'ll have more fun, last longer, and make better decisions when the game fits your style.</p>',
+    coverImage: '',
+    category: 'Tips & Strategy',
+    categorySlug: 'tips-strategy',
+    tags: ['player type', 'game selection', 'tips', 'strategy'],
+    author: 'BigTaka Team',
+    featured: false,
+    status: 'published',
+    publishedDate: new Date('2026-03-22T10:00:00'),
+    views: 0
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+// SETUP FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * Main setup function — seeds categories and articles.
+ * Safe to run multiple times (checks for existing data).
+ * Call from browser console: import { setupSite } from 'backend/setup.jsw'; setupSite();
+ * @returns {Promise<Object>} — { success, categoriesAdded, articlesAdded }
+ */
+export async function setupSite() {
+  try {
+    const catResult = await seedCategories();
+    const artResult = await seedArticles();
+
+    return {
+      success: true,
+      categoriesAdded: catResult,
+      articlesAdded: artResult,
+      message: `Setup complete! Added ${catResult} categories and ${artResult} articles.`
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+async function seedCategories() {
+  const existing = await wixData.query('Categories').find();
+  if (existing.items.length > 0) {
+    console.log('Categories already exist — skipping seed.');
+    return 0;
+  }
+
+  let count = 0;
+  for (const cat of CATEGORIES) {
+    await wixData.insert('Categories', cat);
+    count++;
+  }
+  console.log(`Seeded ${count} categories.`);
+  return count;
+}
+
+async function seedArticles() {
+  const existing = await wixData.query('Articles').find();
+  if (existing.items.length > 0) {
+    console.log('Articles already exist — skipping seed.');
+    return 0;
+  }
+
+  let count = 0;
+  for (const article of ARTICLES) {
+    await wixData.insert('Articles', article);
+    count++;
+  }
+  console.log(`Seeded ${count} articles.`);
+  return count;
+}
+
+/**
+ * Resets all data — USE WITH CAUTION. Deletes all articles, categories, subscribers.
+ * @returns {Promise<Object>}
+ */
+export async function resetAllData() {
+  const collections = ['Articles', 'Categories', 'Subscribers', 'ContactMessages', 'NewsletterLogs', 'SiteStats'];
+
+  for (const col of collections) {
+    try {
+      const results = await wixData.query(col).limit(1000).find();
+      for (const item of results.items) {
+        await wixData.remove(col, item._id);
+      }
+      console.log(`Cleared ${results.items.length} items from ${col}`);
+    } catch (_) {
+      console.log(`Collection ${col} doesn't exist yet — skipping.`);
+    }
+  }
+
+  return { success: true, message: 'All data cleared. Run setupSite() to re-seed.' };
+}

@@ -74,6 +74,18 @@
         "siteMember": { "invoke": false },
         "anonymous": { "invoke": false }
       }
+    },
+    "backend/setup.jsw": {
+      "setupSite": {
+        "siteOwner": { "invoke": true },
+        "siteMember": { "invoke": false },
+        "anonymous": { "invoke": false }
+      },
+      "resetAllData": {
+        "siteOwner": { "invoke": true },
+        "siteMember": { "invoke": false },
+        "anonymous": { "invoke": false }
+      }
     }
   }
 }
