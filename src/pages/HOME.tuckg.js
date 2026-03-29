@@ -1,15 +1,21 @@
 // HOME.tuckg.js — Home page code for PlayBigTaka
-// Search with clear button, lazy-loading images, fade-in animations
+// SEO, search, lazy loading, fade-in animations, analytics
 
 import wixData from 'wix-data';
 import { initLazyImages, initSearch, fixImageAlts } from 'public/siteUtils.js';
+import { setSEO } from 'public/seo.js';
+import { trackPageView, trackTimeOnPage } from 'public/analytics.js';
 
 $w.onReady(function () {
 
-  // ─── Search with clear button & original data preservation ─────────
-  // Requires: #searchInput (TextInput), #clearSearch (Button/Icon),
-  //           #dataset1 (Dataset), #repeater1 (Repeater)
-  // The search filters the dataset; clearing restores the full list.
+  // ─── SEO meta tags & structured data ───────────────────────────────
+  setSEO('HOME');
+
+  // ─── Analytics ─────────────────────────────────────────────────────
+  trackPageView('HOME');
+  trackTimeOnPage('HOME');
+
+  // ─── Search with clear button & data preservation ─────────────────
   try {
     initSearch({
       inputId: '#searchInput',
@@ -23,17 +29,9 @@ $w.onReady(function () {
   }
 
   // ─── Lazy-loading images ───────────────────────────────────────────
-  // List image element IDs on the HOME page.
-  // Images start hidden and fade in when they enter the viewport.
   initLazyImages([
-    '#image1',
-    '#image2',
-    '#image3',
-    '#image4',
-    '#image5',
-    '#image6',
-    '#image7',
-    '#image8'
+    '#image1', '#image2', '#image3', '#image4',
+    '#image5', '#image6', '#image7', '#image8'
   ]);
 
   // ─── Fix alt tags on all images ────────────────────────────────────
@@ -44,7 +42,7 @@ $w.onReady(function () {
     { selector: '#image4', alt: 'Funky Time — Dance-themed live game' },
     { selector: '#image5', alt: 'Super Ace — Card slot game' },
     { selector: '#image6', alt: 'Money Coming — Slot machine game' },
-    { selector: '#image7', alt: 'BigTaka Gaming Tips & Strategies' },
+    { selector: '#image7', alt: 'BigTaka Gaming Tips and Strategies' },
     { selector: '#image8', alt: 'PlayBigTaka Community' }
   ]);
 });

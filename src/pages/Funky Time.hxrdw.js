@@ -1,10 +1,16 @@
 // Funky Time.hxrdw.js — Funky Time article page
-// Share buttons, BigTaka links, alt tags, lazy-loading images
+// SEO, share buttons, BigTaka links, alt tags, lazy loading, analytics
 
 import wixLocation from 'wix-location';
 import { initLazyImages, fixImageAlts, addBigTakaLinks } from 'public/siteUtils.js';
+import { setSEO } from 'public/seo.js';
+import { trackPageView, trackTimeOnPage } from 'public/analytics.js';
 
 $w.onReady(function () {
+
+  setSEO('Funky Time');
+  trackPageView('Funky Time');
+  trackTimeOnPage('Funky Time');
 
   // ─── Share buttons ─────────────────────────────────────────────────
   try {
@@ -16,7 +22,7 @@ $w.onReady(function () {
     });
   } catch (_) {}
 
-  // ─── Clickable BigTaka links in article text ───────────────────────
+  // ─── Clickable BigTaka links ───────────────────────────────────────
   addBigTakaLinks([
     '#text1', '#text2', '#text3', '#text4', '#text5',
     '#richText1', '#richText2'

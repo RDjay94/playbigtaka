@@ -1,14 +1,18 @@
 // Aviator.j83tj.js — Aviator article page
-// Share buttons, BigTaka links, alt tags, lazy-loading images
+// SEO, share buttons, BigTaka links, alt tags, lazy loading, analytics
 
 import wixLocation from 'wix-location';
 import { initLazyImages, fixImageAlts, addBigTakaLinks } from 'public/siteUtils.js';
+import { setSEO } from 'public/seo.js';
+import { trackPageView, trackTimeOnPage, trackEvent } from 'public/analytics.js';
 
 $w.onReady(function () {
 
+  setSEO('Aviator');
+  trackPageView('Aviator');
+  trackTimeOnPage('Aviator');
+
   // ─── Share buttons ─────────────────────────────────────────────────
-  // Requires an HTML embed with ID #shareButtonsEmbed on this page.
-  // Paste shareButtonsHTML from public/embedHTML.js into it.
   try {
     const shareEmbed = $w('#shareButtonsEmbed');
     shareEmbed.postMessage({
@@ -18,7 +22,7 @@ $w.onReady(function () {
     });
   } catch (_) {}
 
-  // ─── Clickable BigTaka links in article text ───────────────────────
+  // ─── Clickable BigTaka links ───────────────────────────────────────
   addBigTakaLinks([
     '#text1', '#text2', '#text3', '#text4', '#text5',
     '#richText1', '#richText2'

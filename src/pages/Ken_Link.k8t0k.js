@@ -1,10 +1,16 @@
 // Ken_Link.k8t0k.js — Ken Link page
-// Share buttons, BigTaka links, alt tags, lazy-loading images
+// SEO, share buttons, BigTaka links, alt tags, lazy loading, analytics
 
 import wixLocation from 'wix-location';
 import { initLazyImages, fixImageAlts, addBigTakaLinks } from 'public/siteUtils.js';
+import { setSEO } from 'public/seo.js';
+import { trackPageView, trackTimeOnPage } from 'public/analytics.js';
 
 $w.onReady(function () {
+
+  setSEO('Ken Link');
+  trackPageView('Ken Link');
+  trackTimeOnPage('Ken Link');
 
   // ─── Share buttons ─────────────────────────────────────────────────
   try {
