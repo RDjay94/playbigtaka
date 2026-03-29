@@ -1,18 +1,22 @@
-// Aviator.j83tj.js — Aviator article page
-// SEO, share buttons, BigTaka links, alt tags, lazy loading, analytics
+// Aviator.j83tj.js — Aviator article page for PlayBigTaka newsletter
+// SEO, share buttons, BigTaka links, lazy loading, analytics
 
 import wixLocation from 'wix-location';
 import { initLazyImages, fixImageAlts, addBigTakaLinks } from 'public/siteUtils.js';
-import { setSEO } from 'public/seo.js';
-import { trackPageView, trackTimeOnPage, trackEvent } from 'public/analytics.js';
+import { setPageSEO } from 'public/seo.js';
+import { trackPageView, trackTimeOnPage } from 'public/analytics.js';
 
 $w.onReady(function () {
 
-  setSEO('Aviator');
+  setPageSEO({
+    title: 'Aviator Game — Tips, Strategies & How to Win | PlayBigTaka',
+    description: 'Master the Aviator crash game with proven strategies, cashout timing tips, and gameplay insights. Learn when to fly and when to cash out.',
+    keywords: 'Aviator game, Aviator strategy, Aviator tips, crash game, how to win Aviator',
+    path: '/aviator'
+  });
   trackPageView('Aviator');
   trackTimeOnPage('Aviator');
 
-  // ─── Share buttons ─────────────────────────────────────────────────
   try {
     const shareEmbed = $w('#shareButtonsEmbed');
     shareEmbed.postMessage({
@@ -22,20 +26,12 @@ $w.onReady(function () {
     });
   } catch (_) {}
 
-  // ─── Clickable BigTaka links ───────────────────────────────────────
-  addBigTakaLinks([
-    '#text1', '#text2', '#text3', '#text4', '#text5',
-    '#richText1', '#richText2'
-  ]);
-
-  // ─── Lazy-loading images ───────────────────────────────────────────
+  addBigTakaLinks(['#text1', '#text2', '#text3', '#text4', '#text5', '#richText1', '#richText2']);
   initLazyImages(['#image1', '#image2', '#image3', '#image4']);
-
-  // ─── Fix alt tags ─────────────────────────────────────────────────
   fixImageAlts([
-    { selector: '#image1', alt: 'Aviator game interface — crash game with rising multiplier' },
-    { selector: '#image2', alt: 'Aviator gameplay strategy — when to cash out' },
+    { selector: '#image1', alt: 'Aviator crash game interface with rising multiplier' },
+    { selector: '#image2', alt: 'Aviator cashout strategy guide' },
     { selector: '#image3', alt: 'Aviator winning tips on PlayBigTaka' },
-    { selector: '#image4', alt: 'Play Aviator on BigTaka — online gaming' }
+    { selector: '#image4', alt: 'Play Aviator on PlayBigTaka' }
   ]);
 });

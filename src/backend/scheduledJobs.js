@@ -1,81 +1,112 @@
-// scheduledJobs.js — Scheduled recurring jobs for PlayBigTaka
-// Configured in jobs.config. Docs: https://www.wix.com/velo/reference/wix-data
+// scheduledJobs.js — Scheduled recurring jobs for PlayBigTaka newsletter
+// Configured in jobs.config.
 
 import wixData from 'wix-data';
+import { getRecentArticles, getActiveSubscribers, generateDigestHTML, logNewsletterSend } from 'backend/newsletter.js';
 
 /**
- * Runs weekly (Sunday 3 AM): Cleans up contact messages older than 90 days.
+ * Runs daily at 9 AM: Generates and logs daily digest.
+ * Connect to an email provider (SendGrid, Mailchimp, Wix Triggered Emails)
+ * to actually deliver the emails.
  */
-export async function cleanupOldMessages() {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - 90);
-
+export async function sendDailyDigest() {
   try {
-    const results = await wixData.query('ContactMessages')
-      .lt('submittedAt', cutoffDate)
-      .limit(100)
-      .find();
+    const articles = await getRecentArticles(1);
+    if (articles.length === 0) {
+      console.log('Daily digest: No new articles today. Skipping.');
+      return;
+    }
 
-    const deletePromises = results.items.map(item =>
-      wixData.remove('ContactMessages', item._id)
-    );
-    await Promise.all(deletePromises);
+    const subscribers = await getActiveSubscribers();
+    const html = generateDigestHTML(articles, 'daily');
 
-    console.log(`Cleanup: Removed ${results.items.length} old contact messages.`);
+    // TODO: Integrate with email service to send actual emails.
+    // Example with SendGrid:
+    //   import sgMail from '@sendgrid/mail';
+    //   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    //   for (const sub of subscribers) {
+    //     await sgMail.send({ to: sub.email, from: 'news@playbigtaka.com', subject, html });
+    //   }
+
+    await logNewsletterSend('daily', articles.length, subscribers.length);
+    console.log(`Daily digest: ${articles.length} articles prepared for ${subscribers.length} subscribers.`);
   } catch (err) {
-    console.error('Cleanup job failed:', err.message);
+    console.error('Daily digest failed:', err.message);
   }
 }
 
 /**
- * Runs weekly (Monday 9 AM): Logs subscriber count for weekly digest.
- * Connect to an email provider (SendGrid, Mailchimp, etc.) for actual sending.
+ * Runs weekly (Monday 9 AM): Generates weekly digest with top articles.
  */
 export async function sendWeeklyDigest() {
   try {
-    const subscribers = await wixData.query('Subscribers')
-      .eq('active', true)
-      .count();
+    const articles = await getRecentArticles(7);
+    if (articles.length === 0) {
+      console.log('Weekly digest: No articles this week. Skipping.');
+      return;
+    }
 
-    // TODO: Integrate with email service to send actual digest
-    // Example with Wix Triggered Emails:
-    //   import { emailContact } from 'wix-crm-backend';
-    //   await emailContact('weeklyDigest', contactId, { variables: { ... } });
+    const subscribers = await getActiveSubscribers();
+    const html = generateDigestHTML(articles, 'weekly');
 
-    console.log(`Weekly digest: ${subscribers} active subscribers.`);
-
-    // Log the digest run
-    await wixData.insert('SiteStats', {
-      type: 'weeklyDigest',
-      subscriberCount: subscribers,
-      timestamp: new Date()
-    });
+    await logNewsletterSend('weekly', articles.length, subscribers.length);
+    console.log(`Weekly digest: ${articles.length} articles prepared for ${subscribers.length} subscribers.`);
   } catch (err) {
-    console.error('Weekly digest job failed:', err.message);
+    console.error('Weekly digest failed:', err.message);
   }
 }
 
 /**
- * Runs daily (midnight): Updates aggregate site statistics.
+ * Runs daily at midnight: Updates site statistics snapshot.
  */
 export async function updateSiteStats() {
   try {
-    const [subscribers, messages, members] = await Promise.all([
+    const [subCount, articleCount, msgCount] = await Promise.all([
       wixData.query('Subscribers').eq('active', true).count(),
-      wixData.query('ContactMessages').eq('status', 'new').count(),
-      wixData.query('MemberProfiles').count()
+      wixData.query('Articles').eq('status', 'published').count(),
+      wixData.query('ContactMessages').eq('status', 'new').count()
     ]);
 
     await wixData.insert('SiteStats', {
       type: 'dailySnapshot',
-      activeSubscribers: subscribers,
-      pendingMessages: messages,
-      totalMembers: members,
+      activeSubscribers: subCount,
+      totalArticles: articleCount,
+      pendingMessages: msgCount,
       timestamp: new Date()
     });
 
-    console.log(`Daily stats: ${subscribers} subs, ${messages} msgs, ${members} members.`);
+    console.log(`Daily stats: ${subCount} subs, ${articleCount} articles, ${msgCount} msgs.`);
   } catch (err) {
-    console.error('Stats update job failed:', err.message);
+    console.error('Stats job failed:', err.message);
+  }
+}
+
+/**
+ * Runs weekly (Sunday 3 AM): Cleans up old contact messages and logs.
+ */
+export async function cleanupOldData() {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 90);
+
+  try {
+    const oldMessages = await wixData.query('ContactMessages')
+      .lt('submittedAt', cutoff)
+      .limit(100)
+      .find();
+
+    const oldLogs = await wixData.query('NewsletterLogs')
+      .lt('sentAt', cutoff)
+      .limit(100)
+      .find();
+
+    const deletes = [
+      ...oldMessages.items.map(i => wixData.remove('ContactMessages', i._id)),
+      ...oldLogs.items.map(i => wixData.remove('NewsletterLogs', i._id))
+    ];
+
+    await Promise.all(deletes);
+    console.log(`Cleanup: Removed ${oldMessages.items.length} messages, ${oldLogs.items.length} logs.`);
+  } catch (err) {
+    console.error('Cleanup failed:', err.message);
   }
 }

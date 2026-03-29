@@ -1,48 +1,98 @@
-// HOME.tuckg.js — Home page code for PlayBigTaka
-// SEO, search, lazy loading, fade-in animations, analytics
+// HOME.tuckg.js — PlayBigTaka newsletter homepage
+// Dynamic news feed: hero with featured articles, category filter,
+// article grid with load-more pagination, subscribe CTA.
 
-import wixData from 'wix-data';
-import { initLazyImages, initSearch, fixImageAlts } from 'public/siteUtils.js';
-import { setSEO } from 'public/seo.js';
-import { trackPageView, trackTimeOnPage } from 'public/analytics.js';
+import wixLocation from 'wix-location';
+import { getLatestArticles, getFeaturedArticles, getArticlesByCategory, getCategories, getSubscriberCount } from 'backend/contentManager.jsw';
+import { setHomeSEO } from 'public/seo.js';
+import { trackPageView } from 'public/analytics.js';
 
-$w.onReady(function () {
+let currentCategory = 'all';
+let currentSkip = 0;
+const PAGE_SIZE = 12;
 
-  // ─── SEO meta tags & structured data ───────────────────────────────
-  setSEO('HOME');
+$w.onReady(async function () {
 
-  // ─── Analytics ─────────────────────────────────────────────────────
+  // ─── SEO & Analytics ──────────────────────────────────────────────
+  setHomeSEO();
   trackPageView('HOME');
-  trackTimeOnPage('HOME');
 
-  // ─── Search with clear button & data preservation ─────────────────
+  // ─── Hero section with featured articles ──────────────────────────
   try {
-    initSearch({
-      inputId: '#searchInput',
-      clearBtnId: '#clearSearch',
-      datasetId: '#dataset1',
-      filterField: 'title',
-      repeaterId: '#repeater1'
+    const heroEmbed = $w('#heroEmbed');
+    const [featured, subCount] = await Promise.all([
+      getFeaturedArticles(5),
+      getSubscriberCount().catch(() => 0)
+    ]);
+
+    heroEmbed.postMessage({ type: 'featured', articles: featured });
+    heroEmbed.postMessage({
+      type: 'stats',
+      subscribers: subCount > 0 ? subCount.toLocaleString() + '+' : '1,000+',
+      articles: '100+'
     });
-  } catch (_) {
-    console.warn('Search elements not found — search disabled.');
-  }
 
-  // ─── Lazy-loading images ───────────────────────────────────────────
-  initLazyImages([
-    '#image1', '#image2', '#image3', '#image4',
-    '#image5', '#image6', '#image7', '#image8'
-  ]);
+    heroEmbed.onMessage((e) => {
+      if (e.data?.type === 'openArticle') wixLocation.to(`/${e.data.slug}`);
+      if (e.data?.type === 'scrollToSubscribe') {
+        try { $w('#subscribeBarEmbed').scrollTo(); } catch (_) {}
+      }
+    });
+  } catch (_) {}
 
-  // ─── Fix alt tags on all images ────────────────────────────────────
-  fixImageAlts([
-    { selector: '#image1', alt: 'PlayBigTaka — Online Gaming Platform' },
-    { selector: '#image2', alt: 'Aviator Game — Crash game with multiplier' },
-    { selector: '#image3', alt: 'Crazy Time — Live casino game show' },
-    { selector: '#image4', alt: 'Funky Time — Dance-themed live game' },
-    { selector: '#image5', alt: 'Super Ace — Card slot game' },
-    { selector: '#image6', alt: 'Money Coming — Slot machine game' },
-    { selector: '#image7', alt: 'BigTaka Gaming Tips and Strategies' },
-    { selector: '#image8', alt: 'PlayBigTaka Community' }
-  ]);
+  // ─── Category filter bar ──────────────────────────────────────────
+  try {
+    const catEmbed = $w('#categoryBarEmbed');
+    const categories = await getCategories();
+    catEmbed.postMessage({ type: 'categories', items: categories, active: 'all' });
+
+    catEmbed.onMessage(async (e) => {
+      if (e.data?.type === 'filterCategory') {
+        currentCategory = e.data.slug;
+        currentSkip = 0;
+        await loadArticles(true);
+      }
+    });
+  } catch (_) {}
+
+  // ─── Article grid ─────────────────────────────────────────────────
+  try {
+    const gridEmbed = $w('#articleGridEmbed');
+
+    gridEmbed.onMessage(async (e) => {
+      if (e.data?.type === 'loadMore') {
+        currentSkip += PAGE_SIZE;
+        await loadArticles(false);
+      }
+      if (e.data?.type === 'openArticle') {
+        wixLocation.to(`/${e.data.slug}`);
+      }
+    });
+  } catch (_) {}
+
+  // ─── Initial load ─────────────────────────────────────────────────
+  await loadArticles(true);
 });
+
+async function loadArticles(reset) {
+  try {
+    const gridEmbed = $w('#articleGridEmbed');
+    if (reset) {
+      currentSkip = 0;
+      gridEmbed.postMessage({ type: 'clearArticles' });
+    }
+
+    let result;
+    if (currentCategory === 'all') {
+      result = await getLatestArticles(PAGE_SIZE, currentSkip);
+    } else {
+      result = await getArticlesByCategory(currentCategory, PAGE_SIZE, currentSkip);
+    }
+
+    gridEmbed.postMessage({
+      type: 'articles',
+      items: result.items,
+      hasMore: (currentSkip + PAGE_SIZE) < result.totalCount
+    });
+  } catch (_) {}
+}

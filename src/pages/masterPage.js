@@ -1,150 +1,138 @@
-// masterPage.js — Site-wide code for PlayBigTaka
-// Runs on every page: splash screen, progress bar, back-to-top, theme toggle,
-// scroll animations, newsletter CTA, contact form, social links, mobile, analytics.
+// masterPage.js — Global site code for PlayBigTaka newsletter
+// Handles: splash screen, progress bar, back-to-top, theme toggle,
+// newsletter subscribe bar, contact form, search, navigation, footer.
 
 import wixWindow from 'wix-window';
 import wixLocation from 'wix-location';
-import { initFadeInAnimations } from 'public/siteUtils.js';
+import { subscribe } from 'backend/contentManager.jsw';
 import { getTheme, toggleTheme } from 'public/theme.js';
 import { trackEvent } from 'public/analytics.js';
 
 $w.onReady(function () {
 
-  // ─── 1. Splash screen ─────────────────────────────────────────────
-  // Requires HTML embed #splashEmbed. Paste splashScreenHTML into it.
+  // ─── Splash screen ────────────────────────────────────────────────
   try {
-    const splashEmbed = $w('#splashEmbed');
-    // Dismiss splash after page is ready (small delay for content to load)
-    setTimeout(() => {
-      splashEmbed.postMessage({ type: 'hideSplash' });
-    }, 1500);
+    const splash = $w('#splashEmbed');
+    setTimeout(() => splash.postMessage({ type: 'hideSplash' }), 1500);
   } catch (_) {}
 
-  // ─── 2. Reading progress bar ───────────────────────────────────────
-  // Requires HTML embed #progressBarEmbed. Paste progressBarHTML into it.
+  // ─── Reading progress bar ─────────────────────────────────────────
   try {
-    const progressEmbed = $w('#progressBarEmbed');
+    const progress = $w('#progressBarEmbed');
     setInterval(async () => {
       try {
-        const rect = await wixWindow.getBoundingRect();
-        const scrollY = rect.scroll.y;
-        const docH = rect.document.height;
-        const winH = rect.window.height;
-        const percent = docH > winH
-          ? Math.min(100, Math.round((scrollY / (docH - winH)) * 100))
+        const r = await wixWindow.getBoundingRect();
+        const pct = r.document.height > r.window.height
+          ? Math.min(100, Math.round((r.scroll.y / (r.document.height - r.window.height)) * 100))
           : 0;
-        progressEmbed.postMessage({ type: 'scroll', percent });
+        progress.postMessage({ type: 'scroll', percent: pct });
       } catch (_) {}
     }, 120);
   } catch (_) {}
 
-  // ─── 3. Back-to-top button ─────────────────────────────────────────
-  // Requires HTML embed #backToTopEmbed. Paste backToTopHTML into it.
+  // ─── Back-to-top button ───────────────────────────────────────────
   try {
-    const backToTopEmbed = $w('#backToTopEmbed');
+    const btt = $w('#backToTopEmbed');
     setInterval(async () => {
       try {
-        const rect = await wixWindow.getBoundingRect();
-        backToTopEmbed.postMessage({ type: 'scrollY', y: rect.scroll.y });
+        const r = await wixWindow.getBoundingRect();
+        btt.postMessage({ type: 'scrollY', y: r.scroll.y });
       } catch (_) {}
     }, 200);
-
-    backToTopEmbed.onMessage((event) => {
-      if (event.data && event.data.type === 'backToTop') {
+    btt.onMessage((e) => {
+      if (e.data?.type === 'backToTop') {
         wixWindow.scrollTo(0, 0, { scrollAnimation: true });
         trackEvent('back_to_top');
       }
     });
   } catch (_) {}
 
-  // ─── 4. Dark/Light mode toggle ─────────────────────────────────────
-  // Requires HTML embed #themeToggleEmbed. Paste themeToggleHTML into it.
+  // ─── Theme toggle ─────────────────────────────────────────────────
   try {
     const themeEmbed = $w('#themeToggleEmbed');
-    // Send current theme on load
     themeEmbed.postMessage({ type: 'theme', mode: getTheme() });
-
-    themeEmbed.onMessage((event) => {
-      if (event.data && event.data.type === 'toggleTheme') {
-        const newMode = toggleTheme();
-        themeEmbed.postMessage({ type: 'theme', mode: newMode });
-        trackEvent('theme_toggle', { mode: newMode });
+    themeEmbed.onMessage((e) => {
+      if (e.data?.type === 'toggleTheme') {
+        const mode = toggleTheme();
+        themeEmbed.postMessage({ type: 'theme', mode });
+        trackEvent('theme_toggle', { mode });
       }
     });
   } catch (_) {}
 
-  // ─── 5. Scroll fade-in animations ─────────────────────────────────
-  initFadeInAnimations([
-    '#section1', '#section2', '#section3', '#section4', '#section5',
-    '#featuredGames', '#aboutSection', '#ctaSection',
-    '#heroSection', '#gamesGrid', '#testimonialsSection'
-  ]);
-
-  // ─── 6. Newsletter signup CTA ─────────────────────────────────────
-  // Requires HTML embed #newsletterEmbed. Paste newsletterHTML into it.
+  // ─── Search bar ───────────────────────────────────────────────────
   try {
-    const newsletterEmbed = $w('#newsletterEmbed');
-    newsletterEmbed.onMessage((event) => {
-      if (event.data && event.data.type === 'subscribe') {
-        const email = event.data.email;
-        trackEvent('newsletter_signup', { email });
-        console.log('Newsletter signup:', email);
-        newsletterEmbed.postMessage({
-          type: 'subscribeResult',
-          success: true,
-          message: "You're subscribed! Welcome to BigTaka."
-        });
+    const searchEmbed = $w('#searchBarEmbed');
+    searchEmbed.onMessage(async (e) => {
+      if (e.data?.type === 'search') {
+        const { searchArticles } = await import('backend/contentManager.jsw');
+        const items = await searchArticles(e.data.query, 8);
+        searchEmbed.postMessage({ type: 'searchResults', items });
+      }
+      if (e.data?.type === 'openArticle') {
+        wixLocation.to(`/${e.data.slug}`);
       }
     });
   } catch (_) {}
 
-  // ─── 7. Contact form ──────────────────────────────────────────────
-  // Requires HTML embed #contactFormEmbed. Paste contactFormHTML into it.
-  try {
-    const contactEmbed = $w('#contactFormEmbed');
-    contactEmbed.onMessage((event) => {
-      if (event.data && event.data.type === 'contactSubmit') {
-        trackEvent('contact_submit', { name: event.data.name });
-        console.log('Contact form:', event.data);
-        contactEmbed.postMessage({
-          type: 'contactResult',
-          success: true,
-          message: "Message received! We'll get back to you soon."
-        });
-      }
-    });
-  } catch (_) {}
-
-  // ─── 8. Mobile viewport reporting ─────────────────────────────────
-  // Requires HTML embed #mobileEnhanceEmbed. Paste mobileCSS into it.
-  try {
-    const mobileEmbed = $w('#mobileEnhanceEmbed');
-    mobileEmbed.onMessage((event) => {
-      if (event.data && event.data.type === 'viewport') {
-        // Can use this to show/hide elements based on mobile detection
-        if (event.data.isMobile) {
-          // Mobile-specific adjustments
-          try { $w('#desktopOnlySection').hide(); } catch (_) {}
+  // ─── Newsletter subscribe (global instances) ──────────────────────
+  // Handles subscribe from any embed on any page that sends { type: 'subscribe', email }
+  const subscribeEmbedIds = ['#subscribeBarEmbed', '#newsletterEmbed', '#heroEmbed'];
+  subscribeEmbedIds.forEach((id) => {
+    try {
+      const embed = $w(id);
+      embed.onMessage(async (e) => {
+        if (e.data?.type === 'subscribe') {
+          const result = await subscribe(e.data.email, e.data.name || '');
+          embed.postMessage({ type: 'subscribeResult', ...result });
+          trackEvent('newsletter_signup', { email: e.data.email });
         }
-      }
-    });
-  } catch (_) {}
+        if (e.data?.type === 'scrollToSubscribe') {
+          try { $w('#subscribeBarEmbed').scrollTo(); } catch (_) {}
+        }
+        if (e.data?.type === 'openArticle') {
+          wixLocation.to(`/${e.data.slug}`);
+        }
+      });
+    } catch (_) {}
+  });
 
-  // ─── 9. 404 page navigation handler ───────────────────────────────
-  // Requires HTML embed #notFoundEmbed. Paste notFoundHTML into it.
+  // ─── Contact form ─────────────────────────────────────────────────
   try {
-    const notFoundEmbed = $w('#notFoundEmbed');
-    notFoundEmbed.onMessage((event) => {
-      if (event.data && event.data.type === 'navigate') {
-        wixLocation.to(event.data.page);
+    const contact = $w('#contactFormEmbed');
+    contact.onMessage(async (e) => {
+      if (e.data?.type === 'contactSubmit') {
+        try {
+          const wixData = (await import('wix-data')).default;
+          await wixData.insert('ContactMessages', {
+            name: e.data.name,
+            email: e.data.email,
+            message: e.data.message,
+            submittedAt: new Date(),
+            status: 'new'
+          });
+          contact.postMessage({ type: 'contactResult', success: true, message: "Message received! We'll respond soon." });
+        } catch (_) {
+          contact.postMessage({ type: 'contactResult', success: false, message: 'Something went wrong. Please try again.' });
+        }
+        trackEvent('contact_submit');
       }
     });
   } catch (_) {}
 
-  // ─── Preconnect hints & html lang ─────────────────────────────────
-  // Add in Wix Dashboard > Settings > Custom Code (in <head>):
-  //   <link rel="preconnect" href="https://www.playbigtaka.com" />
-  //   <link rel="preconnect" href="https://static.wixstatic.com" crossorigin />
-  //   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
-  //   <meta http-equiv="Content-Language" content="en" />
+  // ─── Footer navigation ────────────────────────────────────────────
+  try {
+    const footer = $w('#footerEmbed');
+    footer.onMessage((e) => {
+      if (e.data?.type === 'navigate') wixLocation.to(e.data.path);
+    });
+  } catch (_) {}
+
+  // ─── 404 page navigation ─────────────────────────────────────────
+  try {
+    const nf = $w('#notFoundEmbed');
+    nf.onMessage((e) => {
+      if (e.data?.type === 'navigate') wixLocation.to(e.data.page);
+    });
+  } catch (_) {}
 });

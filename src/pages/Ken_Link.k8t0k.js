@@ -1,18 +1,21 @@
-// Ken_Link.k8t0k.js — Ken Link page
-// SEO, share buttons, BigTaka links, alt tags, lazy loading, analytics
+// Ken_Link.k8t0k.js — Ken Link page for PlayBigTaka newsletter
 
 import wixLocation from 'wix-location';
 import { initLazyImages, fixImageAlts, addBigTakaLinks } from 'public/siteUtils.js';
-import { setSEO } from 'public/seo.js';
+import { setPageSEO } from 'public/seo.js';
 import { trackPageView, trackTimeOnPage } from 'public/analytics.js';
 
 $w.onReady(function () {
 
-  setSEO('Ken Link');
+  setPageSEO({
+    title: 'Ken Link — Game Guide & Strategies | PlayBigTaka',
+    description: 'Explore Ken Link game strategies and tips. Your complete guide to winning.',
+    keywords: 'Ken Link, Ken Link game, Ken Link strategy',
+    path: '/ken-link'
+  });
   trackPageView('Ken Link');
   trackTimeOnPage('Ken Link');
 
-  // ─── Share buttons ─────────────────────────────────────────────────
   try {
     const shareEmbed = $w('#shareButtonsEmbed');
     shareEmbed.postMessage({
@@ -22,20 +25,12 @@ $w.onReady(function () {
     });
   } catch (_) {}
 
-  // ─── Clickable BigTaka links ───────────────────────────────────────
-  addBigTakaLinks([
-    '#text1', '#text2', '#text3', '#text4', '#text5',
-    '#richText1', '#richText2'
-  ]);
-
-  // ─── Lazy-loading images ───────────────────────────────────────────
+  addBigTakaLinks(['#text1', '#text2', '#text3', '#text4', '#text5', '#richText1', '#richText2']);
   initLazyImages(['#image1', '#image2', '#image3', '#image4']);
-
-  // ─── Fix alt tags ─────────────────────────────────────────────────
   fixImageAlts([
     { selector: '#image1', alt: 'Ken Link game on PlayBigTaka' },
     { selector: '#image2', alt: 'Ken Link gameplay and features' },
     { selector: '#image3', alt: 'Ken Link strategies on PlayBigTaka' },
-    { selector: '#image4', alt: 'Play Ken Link on BigTaka' }
+    { selector: '#image4', alt: 'Play Ken Link on PlayBigTaka' }
   ]);
 });

@@ -1,0 +1,222 @@
+// contentManager.jsw — Web module for managing articles, categories, and subscribers
+// This is the CMS backbone of the PlayBigTaka newsletter site.
+// .jsw extension allows these functions to be called from frontend code.
+
+import wixData from 'wix-data';
+
+// ═══════════════════════════════════════════════════════════════════════
+// ARTICLES
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * Gets the latest published articles, sorted by date.
+ * @param {number} limit — Number of articles to fetch (default 20)
+ * @param {number} skip — Number to skip for pagination (default 0)
+ * @returns {Promise<{items: Object[], totalCount: number}>}
+ */
+export async function getLatestArticles(limit = 20, skip = 0) {
+  const results = await wixData.query('Articles')
+    .eq('status', 'published')
+    .descending('publishedDate')
+    .skip(skip)
+    .limit(limit)
+    .find();
+
+  return { items: results.items, totalCount: results.totalCount };
+}
+
+/**
+ * Gets featured/pinned articles for the hero section.
+ * @param {number} limit
+ * @returns {Promise<Object[]>}
+ */
+export async function getFeaturedArticles(limit = 3) {
+  const results = await wixData.query('Articles')
+    .eq('status', 'published')
+    .eq('featured', true)
+    .descending('publishedDate')
+    .limit(limit)
+    .find();
+
+  return results.items;
+}
+
+/**
+ * Gets articles filtered by category.
+ * @param {string} categorySlug
+ * @param {number} limit
+ * @param {number} skip
+ * @returns {Promise<{items: Object[], totalCount: number}>}
+ */
+export async function getArticlesByCategory(categorySlug, limit = 20, skip = 0) {
+  const results = await wixData.query('Articles')
+    .eq('status', 'published')
+    .eq('categorySlug', categorySlug)
+    .descending('publishedDate')
+    .skip(skip)
+    .limit(limit)
+    .find();
+
+  return { items: results.items, totalCount: results.totalCount };
+}
+
+/**
+ * Gets a single article by its slug.
+ * @param {string} slug
+ * @returns {Promise<Object|null>}
+ */
+export async function getArticleBySlug(slug) {
+  const results = await wixData.query('Articles')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .limit(1)
+    .find();
+
+  return results.items.length > 0 ? results.items[0] : null;
+}
+
+/**
+ * Searches articles by keyword in title and excerpt.
+ * @param {string} query
+ * @param {number} limit
+ * @returns {Promise<Object[]>}
+ */
+export async function searchArticles(query, limit = 10) {
+  const results = await wixData.query('Articles')
+    .eq('status', 'published')
+    .contains('title', query)
+    .descending('publishedDate')
+    .limit(limit)
+    .find();
+
+  return results.items;
+}
+
+/**
+ * Gets related articles based on the same category, excluding current.
+ * @param {string} categorySlug
+ * @param {string} excludeId — Article ID to exclude
+ * @param {number} limit
+ * @returns {Promise<Object[]>}
+ */
+export async function getRelatedArticles(categorySlug, excludeId, limit = 4) {
+  const results = await wixData.query('Articles')
+    .eq('status', 'published')
+    .eq('categorySlug', categorySlug)
+    .ne('_id', excludeId)
+    .descending('publishedDate')
+    .limit(limit)
+    .find();
+
+  return results.items;
+}
+
+/**
+ * Creates a new article (admin only — called from admin page or external tool).
+ * @param {Object} article — { title, slug, excerpt, content, coverImage, category, categorySlug, tags, author, featured }
+ * @returns {Promise<Object>}
+ */
+export async function createArticle(article) {
+  const item = {
+    ...article,
+    publishedDate: new Date(),
+    status: 'published',
+    views: 0,
+    featured: article.featured || false
+  };
+  return wixData.insert('Articles', item);
+}
+
+/**
+ * Increments the view count for an article.
+ * @param {string} articleId
+ */
+export async function incrementViews(articleId) {
+  try {
+    const article = await wixData.get('Articles', articleId);
+    article.views = (article.views || 0) + 1;
+    await wixData.update('Articles', article);
+  } catch (_) {}
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CATEGORIES
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * Gets all categories.
+ * @returns {Promise<Object[]>}
+ */
+export async function getCategories() {
+  const results = await wixData.query('Categories')
+    .ascending('sortOrder')
+    .find();
+
+  return results.items;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SUBSCRIBERS
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * Subscribes an email to the newsletter.
+ * @param {string} email
+ * @param {string} name — Optional
+ * @returns {Promise<{success: boolean, message: string}>}
+ */
+export async function subscribe(email, name = '') {
+  // Check for duplicate
+  const existing = await wixData.query('Subscribers')
+    .eq('email', email.toLowerCase().trim())
+    .find();
+
+  if (existing.items.length > 0) {
+    const sub = existing.items[0];
+    if (sub.active) {
+      return { success: true, message: "You're already subscribed!" };
+    }
+    // Reactivate
+    sub.active = true;
+    await wixData.update('Subscribers', sub);
+    return { success: true, message: 'Welcome back! Your subscription is reactivated.' };
+  }
+
+  await wixData.insert('Subscribers', {
+    email: email.toLowerCase().trim(),
+    name: name.trim(),
+    subscribedAt: new Date(),
+    active: true
+  });
+
+  return { success: true, message: "You're subscribed! Welcome to PlayBigTaka." };
+}
+
+/**
+ * Unsubscribes an email.
+ * @param {string} email
+ * @returns {Promise<{success: boolean, message: string}>}
+ */
+export async function unsubscribe(email) {
+  const results = await wixData.query('Subscribers')
+    .eq('email', email.toLowerCase().trim())
+    .find();
+
+  if (results.items.length === 0) {
+    return { success: false, message: 'Email not found.' };
+  }
+
+  const sub = results.items[0];
+  sub.active = false;
+  await wixData.update('Subscribers', sub);
+
+  return { success: true, message: "You've been unsubscribed. Sorry to see you go!" };
+}
+
+/**
+ * Gets subscriber count.
+ * @returns {Promise<number>}
+ */
+export async function getSubscriberCount() {
+  return wixData.query('Subscribers').eq('active', true).count();
+}
