@@ -1,0 +1,72 @@
+<!--
+  PlayBigTaka 18+ age gate — Wix Custom Code version.
+
+  HOW TO USE:
+    1. Wix Dashboard -> Settings -> Custom Code
+    2. Click "+ Add Custom Code"
+    3. Fill in:
+         Name: "18+ Age Gate"
+         Add code to: All pages
+         Place code in: Body - start
+    4. Paste the contents of this file (everything between <style>
+       and the closing </script>) into the code box.
+    5. Click Apply.
+
+  This version is preferred over the iframe template because:
+  - Runs on the playbigtaka.com domain (no iframe sandbox)
+  - sessionStorage works correctly (per-tab persistence)
+  - Full-viewport overlay works natively
+  - Loads before page content renders
+
+  Returning visitors in the same session won't see it again.
+  FB ad reviewers visit fresh (no cookies) so they always see the gate.
+-->
+<style>
+#pbt-age-gate{position:fixed;inset:0;z-index:2147483647;background:rgba(8,2,20,0.96);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,system-ui,sans-serif}
+#pbt-age-gate .pag-card{max-width:460px;width:100%;background:linear-gradient(180deg,#1a0c34 0%,#0d0420 100%);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:30px 26px;text-align:center;color:#fff;box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+#pbt-age-gate .pag-brand{font-size:22px;font-weight:900;color:#ffb800;margin-bottom:10px}
+#pbt-age-gate .pag-eyebrow{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#ffb800;font-weight:700;margin-bottom:8px}
+#pbt-age-gate h2{font-size:22px;margin:0 0 12px;font-weight:800;line-height:1.25;color:#fff}
+#pbt-age-gate p{font-size:14px;line-height:1.6;color:rgba(255,255,255,0.78);margin:0 0 18px}
+#pbt-age-gate .pag-callout{background:rgba(255,184,0,0.08);border:1px solid rgba(255,184,0,0.22);border-radius:10px;padding:12px 14px;font-size:12px;color:rgba(255,255,255,0.85);margin-bottom:22px;text-align:left;line-height:1.55}
+#pbt-age-gate .pag-btns{display:flex;flex-direction:column;gap:10px}
+#pbt-age-gate button{font:inherit;font-weight:700;font-size:15px;padding:14px 18px;border-radius:10px;border:0;cursor:pointer}
+#pbt-age-gate .pag-yes{background:linear-gradient(135deg,#a4ff2c,#5fc814);color:#0d0420}
+#pbt-age-gate .pag-no{background:transparent;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.15)}
+#pbt-age-gate .pag-fine{font-size:11px;color:rgba(255,255,255,0.45);margin-top:14px;line-height:1.5}
+html.pbt-locked,html.pbt-locked body{overflow:hidden!important}
+</style>
+<script>
+(function(){
+  var KEY='pbt_age_gate_ok_v1';
+  function init(){
+    try { if (sessionStorage.getItem(KEY)==='1') return; } catch(e){}
+    document.documentElement.classList.add('pbt-locked');
+    var gate = document.createElement('div');
+    gate.id = 'pbt-age-gate';
+    gate.innerHTML =
+      '<div class="pag-card">' +
+      '  <div class="pag-brand">PlayBigTaka</div>' +
+      '  <div class="pag-eyebrow">18+ Entertainment Only</div>' +
+      '  <h2>Welcome to PlayBigTaka</h2>' +
+      '  <p>A free skill-game guide and strategy hub.</p>' +
+      '  <div class="pag-callout"><strong>This site is for educational content only.</strong><br/>No real money, no deposits, no withdrawals. Nothing on this site can be exchanged for cash or any prize of monetary value. Strictly for adults aged 18+.</div>' +
+      '  <div class="pag-btns">' +
+      '    <button class="pag-yes" id="pag-yes">I am 18 or older &mdash; enter</button>' +
+      '    <button class="pag-no" id="pag-no">I am under 18 &mdash; leave site</button>' +
+      '  </div>' +
+      '  <div class="pag-fine">By entering you confirm this is a free content site with no real-money gambling, betting, or prizes of monetary value.</div>' +
+      '</div>';
+    document.body.appendChild(gate);
+    document.getElementById('pag-yes').addEventListener('click', function(){
+      try { sessionStorage.setItem(KEY,'1'); } catch(e){}
+      document.documentElement.classList.remove('pbt-locked');
+      gate.remove();
+    });
+    document.getElementById('pag-no').addEventListener('click', function(){
+      window.location.replace('https://www.google.com/');
+    });
+  }
+  if (document.body) { init(); } else { document.addEventListener('DOMContentLoaded', init); }
+})();
+</script>
