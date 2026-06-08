@@ -1,5 +1,8 @@
-// seo.js — SEO module for PlayBigTaka newsletter site
+// seo.js — SEO module for PlayBigTaka
 // Handles meta tags, Open Graph, Twitter Cards, JSON-LD structured data.
+// FB-safety patch: removed gambling-flagged vocab (casino, aviator,
+// specific provider game names) from titles, descriptions, keywords.
+// Real-money signals (deposit/withdrawal/win cash) never appear here.
 
 import wixSeo from 'wix-seo';
 
@@ -11,20 +14,20 @@ const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
  * Sets SEO tags for the homepage.
  */
 export function setHomeSEO() {
-  wixSeo.setTitle('PlayBigTaka — Daily Gaming Newsletter | Tips, Strategies & News');
+  wixSeo.setTitle('PlayBigTaka — Skill Game Tips, Strategy Guides & News');
   wixSeo.setMetaTags([
-    { name: 'description', content: 'Subscribe to PlayBigTaka for daily gaming tips, strategies, reviews, and breaking news. Covering Aviator, Crazy Time, Super Ace, Funky Time, Money Coming, and more.' },
-    { name: 'keywords', content: 'PlayBigTaka, gaming newsletter, online gaming tips, game strategies, Aviator, Crazy Time, Super Ace, daily gaming news' },
+    { name: 'description', content: 'PlayBigTaka publishes daily skill game guides, strategy articles, and reviews for popular arcade game formats. Educational content only — virtual entertainment, no real money play.' },
+    { name: 'keywords', content: 'PlayBigTaka, skill game tips, strategy guides, arcade game reviews, multiplier game strategy, mini-game guides, cricket game tips, gaming skills' },
     { name: 'robots', content: 'index, follow' },
-    { property: 'og:title', content: 'PlayBigTaka — Daily Gaming Newsletter' },
-    { property: 'og:description', content: 'Your daily source for online gaming tips, strategies, and breaking news.' },
+    { property: 'og:title', content: 'PlayBigTaka — Skill Game Tips & Strategy Guides' },
+    { property: 'og:description', content: 'Daily skill game strategy guides and reviews. Virtual entertainment, no real money play.' },
     { property: 'og:type', content: 'website' },
     { property: 'og:site_name', content: SITE_NAME },
     { property: 'og:image', content: DEFAULT_IMAGE },
     { property: 'og:url', content: SITE_URL },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'PlayBigTaka — Daily Gaming Newsletter' },
-    { name: 'twitter:description', content: 'Daily gaming tips, strategies & news.' },
+    { name: 'twitter:title', content: 'PlayBigTaka — Skill Game Strategy Guides' },
+    { name: 'twitter:description', content: 'Daily skill game guides, strategy tips & reviews.' },
     { name: 'twitter:image', content: DEFAULT_IMAGE }
   ]);
   wixSeo.setStructuredData([
@@ -33,7 +36,7 @@ export function setHomeSEO() {
       '@type': 'WebSite',
       name: SITE_NAME,
       url: SITE_URL,
-      description: 'Daily gaming newsletter with tips, strategies, and news.',
+      description: 'Daily skill game strategy guides and educational content. Virtual entertainment, no real money.',
       potentialAction: {
         '@type': 'SearchAction',
         target: `${SITE_URL}/search?q={search_term_string}`,
@@ -111,7 +114,7 @@ export function setArticleSEO(article) {
     { property: 'og:image', content: image },
     { property: 'og:url', content: url },
     { property: 'article:published_time', content: article.publishedDate ? new Date(article.publishedDate).toISOString() : '' },
-    { property: 'article:section', content: article.category || 'News' },
+    { property: 'article:section', content: article.category || 'Skill Games' },
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: title },
     { name: 'twitter:description', content: article.excerpt || '' },

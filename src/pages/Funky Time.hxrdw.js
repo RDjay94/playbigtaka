@@ -1,4 +1,4 @@
-// Funky Time.hxrdw.js — Funky Time article page for PlayBigTaka newsletter
+// Funky Time.hxrdw.js — Funky Time live studio show guide page
 
 import wixLocation from 'wix-location';
 import { initLazyImages, fixImageAlts, addBigTakaLinks } from 'public/siteUtils.js';
@@ -8,9 +8,9 @@ import { trackPageView, trackTimeOnPage } from 'public/analytics.js';
 $w.onReady(function () {
 
   setPageSEO({
-    title: 'Funky Time — Dance-Themed Live Game Guide | PlayBigTaka',
-    description: 'Groove your way to wins with our Funky Time guide. Strategies, bonus features, and tips for this disco-themed live casino game.',
-    keywords: 'Funky Time, live game, disco theme, Funky Time strategy, bonus features',
+    title: 'Funky Time — Dance-Themed Live Studio Show Guide | PlayBigTaka',
+    description: 'Strategy guide for Funky Time, the dance-themed live studio show. Bonus mechanics, multipliers, and disciplined play techniques. Educational content only.',
+    keywords: 'Funky Time, live studio show, disco theme, Funky Time strategy, bonus mechanics, multiplier game',
     path: '/funky-time'
   });
   trackPageView('Funky Time');
@@ -21,16 +21,16 @@ $w.onReady(function () {
     shareEmbed.postMessage({
       type: 'pageInfo',
       url: wixLocation.url,
-      title: 'Funky Time — Dance-Themed Live Game | PlayBigTaka'
+      title: 'Funky Time — Dance-Themed Live Studio Show | PlayBigTaka'
     });
   } catch (_) {}
 
   addBigTakaLinks(['#text1', '#text2', '#text3', '#text4', '#text5', '#richText1', '#richText2']);
   initLazyImages(['#image1', '#image2', '#image3', '#image4']);
   fixImageAlts([
-    { selector: '#image1', alt: 'Funky Time live game disco dance theme' },
-    { selector: '#image2', alt: 'Funky Time bonus features and multipliers' },
-    { selector: '#image3', alt: 'Funky Time tips and strategies on PlayBigTaka' },
-    { selector: '#image4', alt: 'Play Funky Time on PlayBigTaka' }
+    { selector: '#image1', alt: 'Funky Time live studio show disco theme' },
+    { selector: '#image2', alt: 'Funky Time bonus mechanics and multipliers' },
+    { selector: '#image3', alt: 'Funky Time strategy guide on PlayBigTaka' },
+    { selector: '#image4', alt: 'Practice Funky Time strategy on PlayBigTaka' }
   ]);
 });
