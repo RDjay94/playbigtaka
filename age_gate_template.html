@@ -1,0 +1,66 @@
+<!--
+  PlayBigTaka 18+ age gate — paste this HTML into a Wix Editor
+  "Custom Embed" element (Add → Embed Code → HTML iframe / Embed HTML).
+  Place it in the Master / Header so it shows on every page.
+
+  Returning visitors in the same session won't see it again (sessionStorage).
+  Facebook ad reviewers visit fresh (no cookies) so they always see the gate,
+  which is the compliance signal Meta looks for on social-casino traffic.
+
+  This file lives at the repo root deliberately — outside src/ — so Velo's
+  build pipeline doesn't try to lint or transpile it.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui,sans-serif}
+    html,body{width:100%;height:100%;background:transparent}
+    #age-gate{position:fixed;inset:0;z-index:99999;background:rgba(8,2,20,0.96);display:flex;align-items:center;justify-content:center;padding:24px}
+    #age-gate .ag-card{max-width:460px;width:100%;background:linear-gradient(180deg,#1a0c34 0%,#0d0420 100%);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:30px 26px;text-align:center;color:#fff;box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+    #age-gate .ag-brand{font-size:22px;font-weight:900;color:#ffb800;margin-bottom:10px}
+    #age-gate .ag-eyebrow{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#ffb800;font-weight:700;margin-bottom:8px}
+    #age-gate h2{font-size:22px;margin:0 0 12px;font-weight:800;line-height:1.25;color:#fff}
+    #age-gate p{font-size:14px;line-height:1.6;color:rgba(255,255,255,0.78);margin:0 0 18px}
+    #age-gate .ag-callout{background:rgba(255,184,0,0.08);border:1px solid rgba(255,184,0,0.22);border-radius:10px;padding:12px 14px;font-size:12px;color:rgba(255,255,255,0.85);margin-bottom:22px;text-align:left;line-height:1.55}
+    #age-gate .ag-btns{display:flex;flex-direction:column;gap:10px}
+    #age-gate button{font:inherit;font-weight:700;font-size:15px;padding:14px 18px;border-radius:10px;border:0;cursor:pointer}
+    #age-gate .ag-yes{background:linear-gradient(135deg,#a4ff2c,#5fc814);color:#0d0420}
+    #age-gate .ag-no{background:transparent;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.15)}
+    #age-gate .ag-fine{font-size:11px;color:rgba(255,255,255,0.45);margin-top:14px;line-height:1.5}
+  </style>
+</head>
+<body>
+<div id="age-gate" role="dialog" aria-modal="true">
+  <div class="ag-card">
+    <div class="ag-brand">PlayBigTaka</div>
+    <div class="ag-eyebrow">18+ Entertainment Only</div>
+    <h2>Welcome to PlayBigTaka</h2>
+    <p>A free skill-game guide and strategy hub.</p>
+    <div class="ag-callout">
+      <strong>This site is for educational content only.</strong><br/>
+      No real money, no deposits, no withdrawals. Nothing on this site can be exchanged for cash or any prize of monetary value. Strictly for adults aged 18 or over.
+    </div>
+    <div class="ag-btns">
+      <button class="ag-yes" id="age-gate-yes">I am 18 or older &mdash; enter</button>
+      <button class="ag-no" id="age-gate-no">I am under 18 &mdash; leave site</button>
+    </div>
+    <div class="ag-fine">By entering, you confirm you understand this is a free content site with no real-money gambling, betting, or prizes of monetary value.</div>
+  </div>
+</div>
+<script>
+(function(){
+  var KEY = "pbt_age_gate_ok_v1";
+  var gate = document.getElementById("age-gate");
+  function getFlag(){ try { return window.parent && window.parent.sessionStorage.getItem(KEY); } catch(e){ try { return sessionStorage.getItem(KEY); } catch(e2){ return null; } } }
+  function setFlag(){ try { window.parent && window.parent.sessionStorage.setItem(KEY, "1"); } catch(e){ try { sessionStorage.setItem(KEY, "1"); } catch(e2){} } }
+  function hide(){ gate.style.display = "none"; }
+  if (getFlag() === "1") { hide(); return; }
+  document.getElementById("age-gate-yes").addEventListener("click", function(){ setFlag(); hide(); });
+  document.getElementById("age-gate-no").addEventListener("click", function(){ try { window.parent.location.replace("https://www.google.com/"); } catch(e){ location.replace("https://www.google.com/"); } });
+})();
+</script>
+</body>
+</html>

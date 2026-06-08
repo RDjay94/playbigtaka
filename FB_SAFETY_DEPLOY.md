@@ -19,7 +19,7 @@ These files are in this commit and take effect the moment you click
 | `src/pages/Money Coming.g34y5.js` | "Slot Machine" stripped — now "Spin Game". |
 | `src/pages/Super Ace.viibv.js` | "Card Slot" stripped — now "Card Spin Game". |
 | `src/pages/Ken_Link.k8t0k.js` | Generic skill-game framing. |
-| `src/public/ageGateEmbed.js` | **NEW.** Ready-to-paste 18+ age-gate HTML for the Wix Editor (see manual steps below). |
+| `age_gate_template.html` (at repo root) | **NEW.** Ready-to-paste 18+ age-gate HTML for the Wix Editor (see manual steps below). Lives at the repo root so Velo doesn't try to lint it. |
 
 After you push this branch (or after Wix's GitHub sync picks it up):
 1. Open the Wix Studio Editor for playbigtaka.com.
@@ -35,8 +35,8 @@ live in page elements, not in code:
 
 - Open the Wix Editor → **Master Page** (so it shows on every page).
 - **Add** → **Embed Code** → **Custom Embed** → **HTML iframe**.
-- Open `src/public/ageGateEmbed.js` from this repo and copy the long string assigned to `AGE_GATE_HTML`.
-- Paste that whole HTML into the embed.
+- Open `age_gate_template.html` from this repo (at the root, not inside `src/`).
+- Copy the entire HTML content of that file and paste it into the embed.
 - Pin the embed to the top-left of the page; set size to full-screen overlay (no padding).
 - Save & Publish.
 
