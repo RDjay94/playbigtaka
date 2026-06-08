@@ -1,5 +1,7 @@
 // siteUtils.js — Shared utility functions for the PlayBigTaka site
 
+import wixData from 'wix-data';
+
 /**
  * Sets up scroll-based fade-in animations on elements.
  * Call with an array of $w element selectors that should animate in.
